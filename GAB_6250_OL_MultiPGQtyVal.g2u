@@ -1,0 +1,55 @@
+Program.Sub.Preflight.Start
+Program.Sub.Preflight.End
+
+Program.Sub.Main.Start
+F.Intrinsic.Control.SetErrorHandler("Sub_Err")
+F.Intrinsic.Control.ClearErrors
+
+V.Local.sError.Declare(String)
+
+'Multi Part Good Quantity Validation
+' Hook 15880 (Gui Update Job)
+
+V.Local.sJob.Declare
+V.Local.sSuffix.Declare
+V.Local.fQtyGood.Declare
+V.Local.sSql.Declare
+V.Local.sRet.Declare
+V.Local.sJob.Set(V.Passed.009990)
+V.Local.sSuffix.Set(V.Passed.009991)
+V.Local.fQtyGood.Set(V.Passed.000001)
+
+
+F.ODBC.Connection!con.OpenConnection(V.Ambient.PDSN,V.Ambient.PUser,V.Ambient.PPass)
+F.Intrinsic.String.Build("Select JOB From JOB_MULT_PARTS WHERE JOB = '{0}' AND SUFFIX = '{1}'",V.Passed.009990,V.Passed.009991,v.Local.sSql) 
+F.ODBC.Connection!con.ExecuteAndReturn(v.Local.sSql,v.Local.sRet)
+F.ODBC.Connection!con.Close
+
+F.Intrinsic.Control.If(v.Local.sRet.Trim,<>,"") 
+	F.Intrinsic.Control.If(V.Passed.000003,=,"Y")
+		F.Intrinsic.Control.If(V.Passed.000001,<>,1)
+			F.Intrinsic.UI.Msgbox("Invalid Value: Quantity in Multi Part (Close) can only be 1","Multi Part Good Qty Validation")
+			V.Passed.777777.Set(1)
+		F.Intrinsic.Control.EndIf
+	F.Intrinsic.Control.Else
+		F.Intrinsic.Control.If(V.Passed.000001,<>,0)
+			F.Intrinsic.UI.Msgbox("Invalid Value: Quantity in Multi Part (Leave)can only be 0","Multi Part Good Qty Validation")
+			V.Passed.777777.Set(1)
+		F.Intrinsic.Control.EndIf
+	F.Intrinsic.Control.EndIf
+F.Intrinsic.Control.EndIf
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("Sub_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: Project",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.Debug.SetLA(V.Local.sError)
+Function.Intrinsic.Control.EndIf	
+
+Program.Sub.Main.End
+
+Program.Sub.Comments.Start
+${$5$}$2.0.0.0$}$2
+${$6$}$rrodriguez$}$20210120135922993$}$YnvOFTUOxTrnxbSzMvfBmnrP7dtKqN6ZKEdpzIv886oxM5lxCc8NOJ9tT57oFxyiJCSaH8JFvep0oKd7Dzyliw==
+Program.Sub.Comments.End
